@@ -1,0 +1,11 @@
+{
+  "title": "Jadeite Systems \u00b7 Surveyor app",
+  "description": "Surveyor mobile app prototype (375 \u00d7 812)",
+  "language": "en-GB",
+  "robots": {
+    "index": false
+  },
+  "icons": {
+    "icon": "favicon.png"
+  }
+}
