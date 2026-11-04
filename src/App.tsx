@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Device, isSignedIn } from './ui/kit';
-import { Login, Code, Locked, Forgot, Welcome } from './pages/Auth';
+import { Splash, Login, Code, Locked, Forgot, Welcome } from './pages/Auth';
 import Today from './pages/Today';
 import Visits, { Search, Notifications, Missed } from './pages/Visits';
 import { SurveyVisit, SurveyFlow, Done, Report, History } from './pages/Survey';
@@ -11,10 +11,10 @@ import Messages, { Thread } from './pages/Messages';
 import Profile, { Details, Work, NotificationsSettings, Connections, Security, Help } from './pages/Profile';
 
 // Jadeite Surveyor — the surveyor's phone app (375 × 812). Same records as the Office Admin, Sales and Surveyor portals.
-const OPEN = ['/login', '/code', '/locked', '/forgot'];
+const OPEN = ['/splash', '/login', '/code', '/locked', '/forgot'];
 function Guard({ children }: { children: React.ReactElement }) {
   const loc = useLocation();
-  if (!isSignedIn() && !OPEN.includes(loc.pathname)) return <Navigate to="/login" replace />;
+  if (!isSignedIn() && !OPEN.includes(loc.pathname)) return <Navigate to="/splash" replace />;
   return children;
 }
 
@@ -23,6 +23,7 @@ export default function App() {
     <Device>
       <Guard>
         <Routes>
+          <Route path="/splash" element={<Splash />} />
           <Route path="/login" element={<Login />} />
           <Route path="/code" element={<Code />} />
           <Route path="/locked" element={<Locked />} />

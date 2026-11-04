@@ -14,7 +14,7 @@ A Vite dev server is already running on `$PORT` (default 8443). Changes hot-relo
 - `src/ui/kit.tsx` – phone frame, status bar, `Screen`, `Header`, bottom `TabBar` (Today, Visits, Calendar, Messages, Profile), bottom `Sheet`, toasts, Tag, Avatar, Field, Check, Switch, Seg, Steps, SignaturePad, PhotoGrid.
 - `src/ui/sheets.tsx` – the pop-ups: On my way (type the arrival time), Can't make it, Customer not in, Time off, Paperwork report upload, Log a call, Message the office, the visit "more" menu.
 - `src/lib/visits.ts` – my visits, statuses, alerts, conversations, the shared actions, size rules (within 5mm = same) and the 9 site checks.
-- `src/pages/` – Auth (sign in, code, locked, forgot, welcome tour), Today, Visits (+ search, notifications, not-in record), Survey (visit, the 5 on-site steps, done, report, history), Inspection, Calendar, Messages (+ thread), Profile (+ details, area and days, notifications, Outlook and Framepoint, security, help).
+- `src/pages/` – Auth (splash, sign in, code, locked, forgot, welcome tour with floating-card pictures, make it yours), Today, Visits (+ search, notifications, not-in record), Survey (visit, the 5 on-site steps, done, report, history), Inspection, Calendar, Messages (+ thread), Profile (+ details, area and days, notifications, Outlook and Framepoint, security, help).
 - `src/data/` – the same sample data and shared demo state as the Surveyor web portal (saved in sessionStorage; "Reset demo data" in Profile clears it).
 - `public/images` – property photos and the Jadeite J logo (relative paths like `images/house.jpg`).
 
@@ -24,7 +24,8 @@ Office books the final survey → it appears in Today, Visits, Calendar and Outl
 ## Design system (do not drift)
 - Font: Sora (400–700). Plain CSS tokens in `src/styles/app.css` (mobile version of the platform tokens).
 - Colours: primary `#00c7a1`, primary-dark `#0b6e5c`, deep `#0b1f1b`, tint `#ebf7f3`, page `#f6f8f7`, border `#e3e9e7`, text `#0f1414` / `#3a4a4a` / `#6b7a78`, ok `#1f9d5b`, warn `#e0a100`, error `#d64545` (use red sparingly).
-- Touch-friendly: buttons 48px, inputs 50px, bottom sheets for every pop-up. Calm, simple, jargon-free wording. Real property photos.
+- Clean, premium and minimal (v2): light page with a soft jade glow at the top, white 24px-radius cards with soft shadows, pill buttons (54px), round icon buttons, one tag style (pill with a dot), one list-row style, floating pill tab bar (active tab shows its label), bottom sheets for every pop-up, toasts at the top. Reuse the classes in `app.css` — don't add one-off colours or borders.
+- Calm, simple, jargon-free wording. Real property photos.
 - Tailwind utilities are available, but Tailwind's base reset is intentionally not loaded.
 
 ## Demo sign-in

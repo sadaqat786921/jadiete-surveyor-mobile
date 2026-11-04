@@ -16,15 +16,15 @@ export default function Profile() {
   const done = visits.filter(v => v.status === 'Submitted').length;
   const sv = visits.filter(v => v.kind === 'Final survey' && v.status === 'Submitted');
   const match = sv.length ? Math.round((sv.filter(v => !v.changed).length / sv.length) * 100) : 100;
-  const row = (to: string, I: any, l: string, s?: string) => <Link to={to} className="li"><span className="ic"><I size={19} /></span><span className="vstack grow" style={{ gap: 0 }}>{l}{s && <span className="tiny muted">{s}</span>}</span><IconChevronRight size={18} className="chev" /></Link>;
+  const row = (to: string, I: any, l: string, s?: string) => <Link to={to} className="li"><span className="ic"><I size={20} /></span><span className="vstack grow" style={{ gap: 1 }}><span className="row-title" style={{ fontWeight: 500 }}>{l}</span>{s && <span className="row-sub ell">{s}</span>}</span><IconChevronRight size={18} className="chev" /></Link>;
   return (
     <Screen tabs header={<div className="hdr-lg"><h1>Profile</h1></div>}>
       <div className="pad" style={{ paddingTop: 4 }}>
-        <div className="card" style={{ alignItems: 'center', textAlign: 'center', background: 'linear-gradient(180deg, #ebf7f3, #fff 70%)' }}>
-          <Avatar i={me.initials} size={76} bg="#00c7a1" fg="#0b1f1b" />
-          <div className="vstack" style={{ gap: 2 }}><b style={{ fontSize: 19 }}>{me.name}</b><span className="small muted">{me.role} · Jadeite Glazing</span></div>
-          <div className="grid-3" style={{ width: '100%' }}>
-            {[[String(done), 'Visits done'], [`${match}%`, 'Sizes matched'], ['5', 'Days a week']].map(([n, l]) => <div key={l} className="vstack" style={{ gap: 0, background: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: '8px 4px' }}><b style={{ fontSize: 17 }}>{n}</b><span className="tiny muted">{l}</span></div>)}
+        <div className="card" style={{ alignItems: 'center', textAlign: 'center' }}>
+          <Avatar i={me.initials} size={80} bg="#00c7a1" fg="#0b1f1b" />
+          <div className="vstack" style={{ gap: 2 }}><b style={{ fontSize: 20, fontWeight: 600, letterSpacing: -0.4 }}>{me.name}</b><span className="small muted">{me.role} · Jadeite Glazing</span></div>
+          <div className="grid-3" style={{ width: '100%', marginTop: 4 }}>
+            {[[String(done), 'Visits done'], [`${match}%`, 'Sizes matched'], ['5', 'Days a week']].map(([n, l]) => <div key={l} className="vstack" style={{ gap: 2, background: 'var(--field)', borderRadius: 18, padding: '12px 4px' }}><b style={{ fontSize: 18, fontWeight: 600 }}>{n}</b><span className="tiny muted">{l}</span></div>)}
           </div>
         </div>
         <div className="card flush"><div className="list">

@@ -27,27 +27,31 @@ export default function Calendar() {
   const Item = ({ a }: { a: Appt }) => {
     const v = a.kind !== 'Time off' ? visitFor(a) : undefined;
     const isOff = a.kind === 'Time off';
-    const col = isOff ? '#9aa8a5' : a.kind === 'Snag visit' ? '#e0a100' : '#0b6e5c';
+    const col = isOff ? '#6b7a78' : a.kind === 'Snag visit' ? '#a87600' : '#0b6e5c';
     const status = a.status === 'Missed' ? 'Not in' : v?.status || a.status;
     return (
-      <button className="card tight" style={{ flex: 1, textAlign: 'left', borderLeft: `4px solid ${col}`, background: isOff ? '#f1f4f3' : '#fff', boxShadow: isOff ? 'none' : undefined, opacity: a.status === 'Missed' ? 0.75 : 1 }} onClick={() => open(a)}>
-        <div className="between"><b style={{ fontSize: 14 }}>{isOff ? `Time off · ${a.customer}` : a.customer}</b>{isOff ? <IconTrash size={16} color="#6b7a78" /> : <Tag tone={a.status === 'Missed' ? 'err' : statusTone[(v?.status || 'Booked') as keyof typeof statusTone] || 'jade'}>{status}</Tag>}</div>
-        <span className="tiny muted hstack" style={{ gap: 5 }}>{isOff ? <><IconBeach size={13} />{a.note || 'Off'} · {a.time}</> : <>{a.kind === 'Snag visit' ? <IconTool size={13} /> : <IconRuler size={13} />}{a.kind === 'Snag visit' ? 'Inspection' : 'Final survey'} · {a.time}</>}</span>
-        {!isOff && a.address && <span className="tiny t2 hstack" style={{ gap: 5 }}><IconMapPin size={13} />{a.address}</span>}
+      <button className="card tight" style={{ flex: 1, textAlign: 'left', flexDirection: 'row', alignItems: 'center', gap: 12, background: isOff ? 'transparent' : '#fff', boxShadow: isOff ? 'inset 0 0 0 1.5px #dfe6e3' : undefined, opacity: a.status === 'Missed' ? 0.7 : 1 }} onClick={() => open(a)}>
+        <span className="icircle sm" style={{ background: isOff ? 'var(--field)' : a.kind === 'Snag visit' ? 'var(--warn-bg)' : 'var(--tint)', color: col }}>{isOff ? <IconBeach size={17} /> : a.kind === 'Snag visit' ? <IconTool size={17} /> : <IconRuler size={17} />}</span>
+        <span className="vstack grow" style={{ gap: 2 }}>
+          <span className="row-title ell">{isOff ? `Time off · ${a.customer}` : a.customer}</span>
+          <span className="row-sub ell">{isOff ? `${a.note || 'Off'} · ${a.time}` : `${a.kind === 'Snag visit' ? 'Inspection' : 'Final survey'} · ${a.address ? a.address.split(', ').slice(-1)[0] : ''}`}</span>
+        </span>
+        {isOff ? <IconTrash size={17} color="#a3b0ad" /> : <Tag tone={a.status === 'Missed' ? 'err' : statusTone[(v?.status || 'Booked') as keyof typeof statusTone] || 'jade'}>{status}</Tag>}
       </button>
     );
   };
   const upcoming = Array.from({ length: 21 }, (_, i) => addDays(TODAY, i)).filter(d => on(d).length);
   return (
     <Screen tabs header={<>
-      <div className="hdr-lg"><h1>Calendar</h1><button className="btn btn-grey btn-sm" onClick={() => { setDay(TODAY); setMode('day'); }}>Today</button></div>
-      <div style={{ padding: '0 16px 10px', display: 'grid', gap: 12 }}>
+      <div className="hdr-lg"><h1>Calendar</h1><button className="btn btn-outline btn-xs" onClick={() => { setDay(TODAY); setMode('day'); }}>Today</button></div>
+      <div style={{ padding: '0 20px 12px', display: 'grid', gap: 12 }}>
         <Seg value={mode} onChange={setMode} items={[{ id: 'day', label: 'Week' }, { id: 'list', label: 'List' }]} />
         {mode === 'day' && <>
+          <div className="card" style={{ padding: 14, gap: 12 }}>
           <div className="between">
-            <button className="icon-btn" aria-label="Previous week" onClick={() => setDay(addDays(day, -7))}><IconChevronLeft size={20} /></button>
-            <b style={{ fontSize: 15 }}>{fmtDate(mon, { day: 'numeric', month: 'short' })} – {fmtDate(addDays(mon, 6), { day: 'numeric', month: 'short', year: 'numeric' })}</b>
-            <button className="icon-btn" aria-label="Next week" onClick={() => setDay(addDays(day, 7))}><IconChevronRight size={20} /></button>
+            <button className="icon-btn soft" aria-label="Previous week" onClick={() => setDay(addDays(day, -7))}><IconChevronLeft size={20} /></button>
+            <b style={{ fontSize: 14.5, fontWeight: 600 }}>{fmtDate(mon, { day: 'numeric', month: 'short' })} – {fmtDate(addDays(mon, 6), { day: 'numeric', month: 'short', year: 'numeric' })}</b>
+            <button className="icon-btn soft" aria-label="Next week" onClick={() => setDay(addDays(day, 7))}><IconChevronRight size={20} /></button>
           </div>
           <div className="week">
             {week.map(d => (
@@ -57,25 +61,26 @@ export default function Calendar() {
               </button>
             ))}
           </div>
+          </div>
         </>}
       </div>
     </>}>
-      <div className="pad" style={{ paddingTop: 4, paddingBottom: 90 }}>
+      <div className="pad" style={{ paddingTop: 4 }}>
         {mode === 'day' ? <>
-          <div className="between"><b style={{ fontSize: 16 }}>{dayLabel(day)}</b><span className="tiny muted">{on(day).filter(a => a.kind !== 'Time off').length} visits</span></div>
+          <div className="sec"><h3>{dayLabel(day)}</h3><span className="tiny muted">{on(day).filter(a => a.kind !== 'Time off').length} visits</span></div>
           {on(day).length === 0 && <Empty icon={<IconCalendarEvent size={24} />} title={new Date(day + 'T12:00:00').getDay() === 0 ? 'Sunday · not a working day' : 'Nothing booked'} sub="The office books your visits." />}
           {on(day).map(a => <div key={a.id} className="agenda"><span className="tm">{startOf(a.time)}<small>{a.time.split('– ')[1] || ''}</small></span><Item a={a} /></div>)}
         </> : <>
           {upcoming.length === 0 && <Empty icon={<IconCalendarEvent size={24} />} title="Nothing booked" sub="The office books your visits." />}
           {upcoming.map(d => (
             <div key={d} className="vstack" style={{ gap: 8 }}>
-              <span className="tiny b muted" style={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>{dayLabel(d)}</span>
+              <div className="sec"><h3>{dayLabel(d)}</h3></div>
               {on(d).map(a => <div key={a.id} className="agenda"><span className="tm" style={{ paddingTop: 12 }}>{startOf(a.time)}</span><Item a={a} /></div>)}
             </div>
           ))}
         </>}
-        <div className="card tight flat">
-          <div className="hstack" style={{ gap: 10 }}><span className="tile" style={{ width: 36, height: 36, borderRadius: 10, background: '#e8f1fb', color: '#0b6e5c' }}><IconBrandWindows size={19} /></span><span className="vstack grow" style={{ gap: 0 }}><b className="small">Synced with Outlook</b><span className="tiny muted">{synced} · busy times stop the office booking you</span></span><button className="icon-btn" aria-label="Sync now" onClick={() => { setSynced('just now'); toast('Synced with Outlook'); }}><IconRefresh size={18} /></button></div>
+        <div className="card tight">
+          <div className="hstack" style={{ gap: 12 }}><span className="icircle jade"><IconBrandWindows size={20} /></span><span className="vstack grow" style={{ gap: 1 }}><span className="row-title">Synced with Outlook</span><span className="row-sub">{synced} · busy times block bookings</span></span><button className="icon-btn soft" aria-label="Sync now" onClick={() => { setSynced('just now'); toast('Synced with Outlook'); }}><IconRefresh size={18} /></button></div>
         </div>
       </div>
       <button className="fab" onClick={() => setOff(true)}><IconBeach size={19} />Time off</button>

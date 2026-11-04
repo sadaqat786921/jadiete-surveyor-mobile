@@ -44,70 +44,70 @@ function VisitView({ v, e }: { v: Visit; e: EnquiryX }) {
   const step = ['Booked', 'On my way', 'On site', 'Submitted'].indexOf(v.status);
   const go = () => { if (!onSite) { start(v); toast('Survey started · everything saves as you go'); } nav(`/survey/${v.id}/measure`); };
   return (
-    <Screen dark foot={
-      onSite ? <button className="btn btn-primary btn-block" onClick={go}><IconArrowRight size={18} />Continue the survey</button>
+    <Screen header={<Header back over={`Final survey · ${e.jobId || e.id}`} title={e.name} right={<button className="icon-btn" aria-label="More" onClick={() => setSheet('menu')}><IconDots size={20} /></button>} />} foot={
+      onSite ? <button className="btn btn-primary btn-block" onClick={go}>Continue the survey<IconArrowRight size={18} /></button>
         : !canStart ? <><button className="btn btn-primary btn-block" disabled><IconClock size={18} />Starts {fmtDate(fs.date, { weekday: 'long', day: 'numeric', month: 'short' })}</button><button className="btn btn-ghost btn-sm" onClick={() => setSheet('cant')}><IconCalendarOff size={16} />Can't make it</button></>
         : <div className="row2">{v.status === 'Booked' && <button className="btn btn-outline" onClick={() => setSheet('way')}><IconCar size={18} />On my way</button>}<button className="btn btn-primary" onClick={go}><IconPlayerPlay size={18} />Start survey</button></div>
     }>
-      <div className="vhero" style={{ backgroundImage: `url(${img(e.photo)})` }}>
-        <div className="between" style={{ padding: '6px 16px' }}>
-          <button className="icon-btn glass" aria-label="Back" onClick={() => nav(-1)}><IconChevronLeft size={22} /></button>
-          <button className="icon-btn glass" aria-label="More" onClick={() => setSheet('menu')}><IconDots size={20} /></button>
+      <div className="pad">
+        <div className="cover" style={{ backgroundImage: `url(${img(e.photo)})` }}>
+          <div className="photo-tags"><Tag tone="jade">Final survey</Tag><Tag tone={statusTone[v.status]}>{v.status}</Tag></div>
         </div>
-        <div style={{ marginTop: 'auto', padding: '0 20px 30px' }} className="vstack">
-          <span className="hstack" style={{ gap: 6 }}><Tag tone="jade">Final survey</Tag><Tag tone={statusTone[v.status]}>{v.status}</Tag></span>
-          <b style={{ fontSize: 24, letterSpacing: -0.5 }}>{e.name}</b>
-          <span className="hstack small" style={{ gap: 5, color: '#e3eeeb' }}><IconMapPin size={15} />{e.address}, {e.postcode}</span>
+        <div className="card">
+          <div className="between" style={{ alignItems: 'flex-start' }}>
+            <span className="vstack" style={{ gap: 3 }}><span className="label">{fmtDate(fs.date, { weekday: 'long', day: 'numeric', month: 'long' })}</span><b style={{ fontSize: 22, fontWeight: 600, letterSpacing: -0.6 }}>{fs.time}</b></span>
+            <span className="outline-pill">{plural(frameCount(e), 'frame')}</span>
+          </div>
+          <div className="facts"><span><IconMapPin size={17} />{e.address}, {e.postcode}</span></div>
+          <div className="divider" />
+          <Steps at={step} times={[undefined, fs.onWay, fs.startedAt]} />
         </div>
-      </div>
-      <div className="sheet-up pad">
-        <div className="card"><Steps at={step} times={[undefined, fs.onWay, fs.startedAt]} /></div>
-        {fs.moveAsked && <div className="alert warn"><IconCalendarOff size={17} /><span><b>You asked the office to move this visit.</b> {fs.moveAsked} Sarah will confirm the new time.</span></div>}
-        <div className="alert info"><IconArrowRight size={17} /><span>{onSite ? <><b>On site since {fs.startedAt}.</b> Carry on where you left off.</> : canStart ? <><b>Next: {fs.onWay ? 'start the survey when you arrive' : 'tell the customer you are on your way'}.</b> Read the salesperson's notes and sizes first.</> : <><b>Booked for {fmtDate(fs.date, { weekday: 'long', day: 'numeric', month: 'long' })}.</b> You can read everything now.</>}</span></div>
-        <div className="kv">
-          <div><span>When</span><b>{fmtDate(fs.date)} · {fs.time}</b></div>
-          <div><span>Frames to check</span><b>{frameCount(e)} in {plural(items.length, 'item')}</b></div>
+        {fs.moveAsked && <div className="alert warn"><IconCalendarOff size={16} /><span><b>You asked the office to move this visit.</b> {fs.moveAsked} Sarah will confirm the new time.</span></div>}
+        <div className="alert info"><IconArrowRight size={16} /><span>{onSite ? <><b>On site since {fs.startedAt}.</b> Carry on where you left off.</> : canStart ? <><b>Next: {fs.onWay ? 'start the survey when you arrive' : 'tell the customer you are on your way'}.</b> Read the salesperson's notes and sizes first.</> : <><b>Booked for {fmtDate(fs.date, { weekday: 'long', day: 'numeric', month: 'long' })}.</b> You can read everything now.</>}</span></div>
+        {e.survey?.notes && <div className="alert warn"><IconAlertTriangle size={16} /><span><b>{salespersonOf(e).split(' ')[0]} asked you to check</b><br />{e.survey.notes}</span></div>}
+
+        <div className="sec"><h3>About the visit</h3></div>
+        <div className="card" style={{ padding: '6px 20px' }}><div className="kvs">
           <div><span>Measured by</span><b>{salespersonOf(e)}</b></div>
           <div><span>Framepoint quote</span><b>{e.survey?.fp?.ref || '—'}</b></div>
+          <div><span>Items</span><b>{frameCount(e)} frames in {plural(items.length, 'item')}</b></div>
           <div><span>Access</span><b>{e.survey?.access || 'Front of the house'}</b></div>
           <div><span>Parking</span><b>{e.survey?.parking || 'On the street'}</b></div>
-        </div>
-        {e.survey?.notes && <div className="alert warn"><IconAlertTriangle size={17} /><span><b>{salespersonOf(e).split(' ')[0]} asked you to check:</b> {e.survey.notes}</span></div>}
-        {e.appt?.outcome && <div className="card tight flat"><span className="tiny b muted">FROM THE SALES VISIT</span><span className="small t2">{e.appt.outcome}</span></div>}
+          {e.appt?.outcome && <div><span>Sales visit</span><b>{e.appt.outcome}</b></div>}
+        </div></div>
 
         <div className="sec"><h3>What you will check</h3><span className="tiny muted">{plural(items.length, 'item')}</span></div>
-        {items.map(i => (
-          <div key={i.no} className="card tight">
-            <div className="hstack" style={{ gap: 12, alignItems: 'flex-start' }}>
-              <Thumb src={i.photo || 'window'} size={52} r={10} />
-              <div className="vstack grow" style={{ gap: 4 }}>
-                <b style={{ fontSize: 14 }}>{i.no}. {i.name}{i.qty > 1 ? ` × ${i.qty}` : ''}</b>
-                <span className="tiny muted">{i.product}</span>
-                <span><Tag tone="jade" icon={<IconRuler size={12} />}>{i.size}</Tag></span>
-              </div>
+        <div className="card flush"><div className="list">
+          {items.map(i => (
+            <div key={i.no} className="li" style={{ alignItems: 'flex-start' }}>
+              <Thumb src={i.photo || 'window'} size={48} />
+              <span className="vstack grow" style={{ gap: 3 }}>
+                <span className="row-title">{i.no}. {i.name}{i.qty > 1 ? ` × ${i.qty}` : ''}</span>
+                <span className="row-sub">{i.product}</span>
+                <span className="small" style={{ fontWeight: 600, marginTop: 2 }}>{i.size}</span>
+              </span>
             </div>
-            <div className="chips wrap" style={{ gap: 6 }}>{i.spec.slice(0, 4).map(([k, val]) => <span key={k} className="tag grey">{k}: {val}</span>)}</div>
-          </div>
-        ))}
+          ))}
+        </div></div>
 
         {e.survey?.fp && <>
           <div className="sec"><h3>Documents</h3></div>
-          <button className="file" onClick={() => toast(`Opening ${e.survey!.fp!.file}`)}><IconFileTypePdf size={26} color="#d64545" /><span className="grow vstack" style={{ gap: 1 }}><b className="small">{e.survey.fp.file}</b><span className="tiny muted">Survey report from Framepoint</span></span><IconChevronRight size={18} color="#a5b2af" /></button>
-          <button className="file" onClick={() => toast(`Opening ${e.survey!.fp!.quoteFile}`)}><IconFileTypePdf size={26} color="#d64545" /><span className="grow vstack" style={{ gap: 1 }}><b className="small">{e.survey.fp.quoteFile}</b><span className="tiny muted">Accepted quote</span></span><IconChevronRight size={18} color="#a5b2af" /></button>
+          {[[e.survey.fp.file, 'Survey report from Framepoint'], [e.survey.fp.quoteFile, 'Accepted quote']].map(([f, sub]) => (
+            <button key={f} className="file" onClick={() => toast(`Opening ${f}`)}><span className="icircle" style={{ background: 'var(--err-bg)', color: 'var(--err)' }}><IconFileTypePdf size={20} /></span><span className="grow vstack" style={{ gap: 2 }}><span className="row-title ell" style={{ fontSize: 13.5 }}>{f}</span><span className="row-sub">{sub}</span></span><IconChevronRight size={18} color="#a3b0ad" /></button>
+          ))}
         </>}
 
         <div className="sec"><h3>Customer</h3></div>
         <div className="card">
-          <div className="hstack" style={{ gap: 12 }}><Avatar i={e.initials} size={44} /><div className="vstack grow" style={{ gap: 1 }}><b>{e.name}</b><span className="small muted">{e.phone}</span></div></div>
-          <div className="grid-2">
-            <a className="btn btn-outline btn-sm" href={`tel:${e.phone.replace(/\s/g, '')}`} onClick={() => toast(`Calling ${e.name}`)}><IconPhone size={16} />Call</a>
-            <a className="btn btn-outline btn-sm" href={maps(`${e.address} ${e.postcode}`)} target="_blank" rel="noreferrer"><IconMapPin size={16} />Directions</a>
-          </div>
+          <div className="hstack" style={{ gap: 12 }}><Avatar i={e.initials} size={46} /><div className="vstack grow" style={{ gap: 1 }}><span className="row-title">{e.name}</span><span className="row-sub">{e.phone}</span></div>
+            <a className="icon-btn soft" aria-label="Call" href={`tel:${e.phone.replace(/\s/g, '')}`} onClick={() => toast(`Calling ${e.name}`)}><IconPhone size={19} /></a>
+            <a className="icon-btn soft" aria-label="Directions" href={maps(`${e.address} ${e.postcode}`)} target="_blank" rel="noreferrer"><IconMapPin size={19} /></a></div>
         </div>
+        <div className="sec"><h3>People on this job</h3></div>
         <People e={e} />
         <div className="grid-2">
-          <button className="btn btn-grey btn-sm" onClick={() => setSheet('msg')}><IconSend size={16} />Message office</button>
-          <Link className="btn btn-grey btn-sm" to={`/history/${e.id}`}><IconHistory size={16} />History</Link>
+          <button className="btn btn-outline btn-sm" onClick={() => setSheet('msg')}><IconSend size={16} />Message office</button>
+          <Link className="btn btn-outline btn-sm" to={`/history/${e.id}`}><IconHistory size={16} />History</Link>
         </div>
       </div>
       <VisitSheets v={v} sheet={sheet} setSheet={setSheet} />
@@ -119,7 +119,7 @@ export function People({ e }: { e: EnquiryX }) {
   return (
     <div className="card flush"><div className="list">
       {([['Salesperson', salespersonOf(e), staffById(e.assigned)?.initials || 'S'], ['Surveyor', `${me.name} (you)`, me.initials], ['Office', 'Sarah Mitchell', 'SM']] as [string, string, string][]).map(([r, n, i]) => (
-        <div key={r} className="li"><Avatar i={i} size={36} /><span className="vstack" style={{ gap: 0 }}><span className="tiny muted">{r}</span><b style={{ fontSize: 14 }}>{n}</b></span></div>
+        <div key={r} className="li"><Avatar i={i} size={42} /><span className="vstack grow" style={{ gap: 1 }}><span className="row-title">{n}</span><span className="row-sub">{r}</span></span></div>
       ))}
     </div></div>
   );
@@ -216,23 +216,23 @@ function Flow({ v, e }: { v: Visit; e: EnquiryX }) {
 
   return (
     <Screen scrollRef={scroller} header={<>
-      <Header back onBack={() => nav(`/visit/${v.id}`)} title={e.name} sub={`Step ${idx + 1} of 5 · ${STEPS[idx][1]}`} right={<button className="btn btn-grey btn-xs" onClick={() => { save(); toast('Saved · carry on any time from Today'); nav('/'); }}><IconDeviceFloppy size={15} />Save</button>} />
+      <Header back onBack={() => nav(`/visit/${v.id}`)} over={`Step ${idx + 1} of 5`} title={STEPS[idx][1]} right={<button className="btn btn-outline btn-xs" onClick={() => { save(); toast('Saved · carry on any time from Today'); nav('/'); }}><IconDeviceFloppy size={15} />Save</button>} />
       <div className="prog">{STEPS.map(([s], i) => <span key={s} className={i === idx ? 'now' : done[s] ? 'done' : ''} />)}</div>
     </>} foot={foot}>
       <div className="pad" style={{ paddingTop: 6 }}>
 
         {step === 'measure' && <>
-          <div className="vstack" style={{ gap: 4 }}><h2 style={{ fontSize: 20, letterSpacing: -0.3 }}>Measure each item</h2><span className="small t2">Type the size in millimetres. Within {TOL}mm of the salesperson's size counts as the same.</span></div>
+          <div className="vstack" style={{ gap: 4 }}><span className="small t2">Type the size in millimetres. Within {TOL}mm of the salesperson's size counts as the same.</span></div>
           {paper ? <>
             <div className="alert ok"><IconFileText size={17} /><span><b>The sizes come from your paperwork report.</b> Typed sizes are not used. Remove the report to type them instead.</span></div>
             <PaperCard p={paper} onReplace={() => setSheet('paper')} onRemove={() => { setPaper(undefined); updEnq(e.id, {}, { kind: 'system', title: 'Paperwork report removed · sizes will be typed in', who: me.name }); toast('Report removed · type each size instead'); }} />
           </> : (
-            <button className="file" style={{ background: 'var(--tint-2)', borderStyle: 'dashed', borderColor: '#b9d9cf' }} onClick={() => setSheet('paper')}>
-              <span className="tile" style={{ width: 42, height: 42, borderRadius: 12, background: '#fff', color: 'var(--primary-dark)' }}><IconUpload size={20} /></span>
-              <span className="grow vstack" style={{ gap: 1 }}><b style={{ fontSize: 14 }}>Upload paperwork report</b><span className="tiny muted">Wrote it on paper? Add a photo instead of typing</span></span><IconChevronRight size={18} color="#a5b2af" />
+            <button className="file" onClick={() => setSheet('paper')}>
+              <span className="icircle jade"><IconUpload size={20} /></span>
+              <span className="grow vstack" style={{ gap: 2 }}><span className="row-title">Upload paperwork report</span><span className="tiny muted">Wrote it on paper? Add a photo instead of typing</span></span><IconChevronRight size={18} color="#a5b2af" />
             </button>
           )}
-          {!paper && <div className="between"><span className="tiny b muted">{measured} OF {items.length} MEASURED</span><button className="link" onClick={() => { items.forEach((_, k) => { if (!m[k].w || !m[k].h) same(k); }); toast('Empty sizes filled with the sales sizes'); }}><IconCopy size={15} />Fill the rest with sales sizes</button></div>}
+          {!paper && <div className="between"><span className="tiny muted"><b style={{ color: 'var(--text)' }}>{measured} of {items.length}</b> measured</span><button className="link" onClick={() => { items.forEach((_, k) => { if (!m[k].w || !m[k].h) same(k); }); toast('Empty sizes filled with the sales sizes'); }}><IconCopy size={15} />Fill the rest with sales sizes</button></div>}
           {items.map((i, k) => {
             const r = paper ? !paper.changed.includes(i.no) : sizeMatches(i.size || '', m[k]);
             const [dw, dh] = !paper && r === false ? sizeDiff(i.size || '', m[k]) : [0, 0];
@@ -265,7 +265,7 @@ function Flow({ v, e }: { v: Visit; e: EnquiryX }) {
         </>}
 
         {step === 'checks' && <>
-          <div className="vstack" style={{ gap: 4 }}><h2 style={{ fontSize: 20, letterSpacing: -0.3 }}>Site checks</h2><span className="small t2">Answer every question. Anything "No" or "Not sure" goes to the office and the fitters.</span></div>
+          <div className="vstack" style={{ gap: 4 }}><span className="small t2">Answer every question. Anything "No" or "Not sure" goes to the office and the fitters.</span></div>
           {answered < SITE_CHECKS.length && <button className="btn btn-outline btn-sm" onClick={() => { setSite(s => { const n = { ...s }; SITE_CHECKS.forEach(([k]) => { if (!n[k]) n[k] = { ok: 'Yes' }; }); return n; }); toast('Every unanswered check set to Yes'); }}><IconListCheck size={16} />Everything else is fine · answer Yes</button>}
           {e.survey?.notes && <div className="alert warn"><IconAlertTriangle size={17} /><span>{salespersonOf(e).split(' ')[0]} asked: {e.survey.notes}</span></div>}
           {SITE_CHECKS.map(([k, l], n) => (
@@ -278,15 +278,15 @@ function Flow({ v, e }: { v: Visit; e: EnquiryX }) {
         </>}
 
         {step === 'photos' && <>
-          <div className="vstack" style={{ gap: 4 }}><h2 style={{ fontSize: 20, letterSpacing: -0.3 }}>Photos</h2><span className="small t2">The front, the back and anything the fitters should know about. At least one photo.</span></div>
-          <div className="card"><div className="between"><b style={{ fontSize: 14 }}>Whole property</b><span className="tiny muted">{plural(photos, 'photo')}</span></div><PhotoGrid n={photos} seed={0} onAdd={() => { setPhotos(p => p + 1); toast('Photo added'); }} onRemove={() => setPhotos(p => Math.max(0, p - 1))} /></div>
+          <div className="vstack" style={{ gap: 4 }}><span className="small t2">The front, the back and anything the fitters should know about. At least one photo.</span></div>
+          <div className="card"><div className="between"><span className="row-title">Whole property</span><span className="tiny muted">{plural(photos, 'photo')}</span></div><PhotoGrid n={photos} seed={0} onAdd={() => { setPhotos(p => p + 1); toast('Photo added'); }} onRemove={() => setPhotos(p => Math.max(0, p - 1))} /></div>
           {items.map((i, k) => (
-            <div key={i.no} className="card"><div className="between"><b style={{ fontSize: 14 }}>{i.no}. {i.name}</b><span className="tiny muted">{plural(m[k].photos, 'photo')}</span></div><PhotoGrid n={m[k].photos} seed={k + 1} onAdd={() => { upd(k, { photos: m[k].photos + 1 }); toast('Photo added'); }} onRemove={() => upd(k, { photos: Math.max(0, m[k].photos - 1) })} /></div>
+            <div key={i.no} className="card"><div className="between"><span className="row-title">{i.no}. {i.name}</span><span className="tiny muted">{plural(m[k].photos, 'photo')}</span></div><PhotoGrid n={m[k].photos} seed={k + 1} onAdd={() => { upd(k, { photos: m[k].photos + 1 }); toast('Photo added'); }} onRemove={() => upd(k, { photos: Math.max(0, m[k].photos - 1) })} /></div>
           ))}
         </>}
 
         {step === 'sign' && <>
-          <div className="vstack" style={{ gap: 4 }}><h2 style={{ fontSize: 20, letterSpacing: -0.3 }}>Notes and signature</h2><span className="small t2">The customer signs to say the sizes and the work were explained to them.</span></div>
+          <div className="vstack" style={{ gap: 4 }}><span className="small t2">The customer signs to say the sizes and the work were explained to them.</span></div>
           <Field label="Notes for the office (optional)"><textarea className="textarea" value={notes} onChange={x => setNotes(x.target.value)} placeholder="e.g. Customer wants the back door to open out" /></Field>
           <Field label="Notes for the fitters (optional)"><textarea className="textarea" value={fitter} onChange={x => setFitter(x.target.value)} placeholder="e.g. Bring a 3-step ladder. Dog in the kitchen." /></Field>
           <div className="card">
@@ -298,7 +298,7 @@ function Flow({ v, e }: { v: Visit; e: EnquiryX }) {
         </>}
 
         {step === 'review' && <>
-          <div className="vstack" style={{ gap: 4 }}><h2 style={{ fontSize: 20, letterSpacing: -0.3 }}>Check and submit</h2><span className="small t2">Tap a line to go back to it.</span></div>
+          <div className="vstack" style={{ gap: 4 }}><span className="small t2">Tap a line to go back to it.</span></div>
           <div className="card flush"><div className="list">
             {([[IconRuler, 'Sizes', paper ? `Paperwork report · ${changed.length ? `${changed.length} different` : 'all the same as sales'}` : measured === items.length ? (changed.length ? `${changed.length} changed · ${items.length - changed.length} the same` : 'All the same as sales') : `${items.length - measured} still to measure`, done.measure, 0], [IconListCheck, 'Site checks', answered === SITE_CHECKS.length ? (issues.length ? `${issues.length} to look at` : 'No problems found') : `${SITE_CHECKS.length - answered} not answered`, done.checks, 1], [IconPhoto, 'Photos', allPhotos ? plural(allPhotos, 'photo') : 'No photos yet', done.photos, 2], [IconSignature, 'Signature', signed ? `Signed by ${signer}` : noSign ? `Not signed: ${noSign}` : 'Not signed yet', done.sign, 3]] as [any, string, string, boolean, number][]).map(([I, l, val, ok, i]) => (
               <button key={l} className="li" onClick={() => go(i)}>
@@ -370,29 +370,28 @@ export function Report() {
   const ch = (fs.checks || []).filter(c => !c.ok);
   const photos = (fs.photos || 0) + (fs.checks || []).reduce((a, c) => a + (c.photos || 0), 0);
   return (
-    <Screen header={<Header back title="Final survey report" sub={`${e.name} · ${e.jobId || e.id}`} white />} foot={<button className="btn btn-primary btn-block" onClick={() => toast(`Final survey ${e.jobId || e.id}.pdf downloaded`)}><IconDownload size={18} />Download report (PDF)</button>}>
+    <Screen header={<Header back over={`${e.name} · ${e.jobId || e.id}`} title="Final survey report" />} foot={<button className="btn btn-primary btn-block" onClick={() => toast(`Final survey ${e.jobId || e.id}.pdf downloaded`)}><IconDownload size={18} />Download report (PDF)</button>}>
       <div className="pad">
-        <div className="card" style={{ background: ch.length ? '#fffaf0' : '#f2fbf6', borderColor: ch.length ? '#f2e0a8' : '#bfe8d3' }}>
-          <div className="hstack" style={{ gap: 12 }}>
-            <span className="tile" style={{ width: 48, height: 48, borderRadius: 14, background: '#fff', color: ch.length ? '#9a6f00' : 'var(--ok)' }}>{ch.length ? <IconAlertTriangle size={24} /> : <IconCircleCheck size={26} />}</span>
-            <span className="vstack grow" style={{ gap: 2 }}><b style={{ fontSize: 16 }}>{ch.length ? `${plural(ch.length, 'size')} changed` : 'All sizes match'}</b><span className="small t2">{ch.length ? `${salespersonOf(e)} revises the quote before the office orders.` : 'The office can get the order ready.'}</span></span>
-          </div>
+        <div className="card" style={{ alignItems: 'center', textAlign: 'center', gap: 10 }}>
+          <span className="tile" style={{ width: 60, height: 60, borderRadius: '50%', background: ch.length ? 'var(--warn-bg)' : 'var(--ok-bg)', color: ch.length ? 'var(--warn)' : 'var(--ok)' }}>{ch.length ? <IconAlertTriangle size={26} /> : <IconCircleCheck size={28} />}</span>
+          <b style={{ fontSize: 20, fontWeight: 600, letterSpacing: -0.5 }}>{ch.length ? `${plural(ch.length, 'size')} changed` : 'All sizes match'}</b>
+          <span className="small muted">{ch.length ? `${salespersonOf(e)} revises the quote before the office orders.` : 'The office can get the order ready.'}</span>
         </div>
-        <div className="kv">
+        <div className="card" style={{ padding: '6px 20px' }}><div className="kvs">
           <div><span>Surveyor</span><b>{staffById(fs.surveyor)?.name}</b></div>
-          <div><span>Submitted</span><b>{fs.doneOn}</b></div>
           <div><span>Visit</span><b>{fmtDate(fs.date)} · {startOf(fs.time)}</b></div>
+          <div><span>Submitted</span><b>{fs.doneOn}</b></div>
           <div><span>Customer signature</span><b>{fs.signed ? fs.signedBy || e.name : 'Not signed'}</b></div>
           <div><span>Photos</span><b>{photos}</b></div>
           <div><span>Quote</span><b>{e.ops?.revision ? `${e.ops.revision.from} → ${e.ops.revision.to}` : e.survey?.fp?.ref || '—'}</b></div>
-        </div>
+        </div></div>
         {fs.paper && <><div className="sec"><h3>Paperwork report</h3><span className="tiny muted">Uploaded on site</span></div><PaperCard p={fs.paper} /></>}
         <div className="sec"><h3>Sizes</h3></div>
         <div className="card flush"><div className="list">
           {(fs.checks || []).map(c => (
             <div key={c.no} className="li" style={{ alignItems: 'flex-start' }}>
-              <span className="tile" style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--bg)', fontSize: 12, fontWeight: 700 }}>{c.no}</span>
-              <span className="vstack grow" style={{ gap: 2 }}><b style={{ fontSize: 13.5 }}>{c.name}</b><span className="tiny muted">Sales {c.sales}</span><span className="tiny t2">Yours <b>{c.checked}</b></span>{c.note && <span className="tiny muted">“{c.note}”</span>}</span>
+              <span className="tile" style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--field)', fontSize: 13, fontWeight: 600 }}>{c.no}</span>
+              <span className="vstack grow" style={{ gap: 2 }}><span className="row-title">{c.name}</span><span className="tiny muted">Sales {c.sales}</span><span className="tiny t2">Yours <b>{c.checked}</b></span>{c.note && <span className="tiny muted">“{c.note}”</span>}</span>
               {c.ok ? <Tag tone="ok">Matches</Tag> : <Tag tone="warn">Changed</Tag>}
             </div>
           ))}
@@ -419,13 +418,13 @@ export function History() {
   const e = enquiries.find(x => x.id === id);
   if (!e) return <Navigate to="/visits" replace />;
   return (
-    <Screen header={<Header back title="History" sub={`${e.name} · ${e.jobId || e.id}`} />}>
+    <Screen header={<Header back over={`${e.name} · ${e.jobId || e.id}`} title="History" />}>
       <div className="pad">
         <div className="card">
           {(e.comms || []).map((c, i, a) => { const [I, col] = commIcon[c.kind] || commIcon.system; return (
             <div key={c.id} className="hstack" style={{ gap: 12, alignItems: 'flex-start' }}>
-              <span className="vstack" style={{ alignItems: 'center', gap: 0, alignSelf: 'stretch' }}><span className="tile" style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--bg)', color: col }}><I size={16} /></span>{i < a.length - 1 && <span style={{ flex: 1, width: 2, background: 'var(--border)', margin: '4px 0' }} />}</span>
-              <span className="vstack grow" style={{ gap: 3, paddingBottom: 12 }}><b style={{ fontSize: 13.5 }}>{c.title}</b><span className="tiny muted">{c.who} · {c.when}</span>{c.body && <span className="small t2" style={{ background: 'var(--bg)', borderRadius: 10, padding: '8px 10px' }}>{c.body}</span>}</span>
+              <span className="vstack" style={{ alignItems: 'center', gap: 0, alignSelf: 'stretch' }}><span className="tile" style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--field)', color: col }}><I size={16} /></span>{i < a.length - 1 && <span style={{ flex: 1, width: 2, background: 'var(--border)', margin: '4px 0' }} />}</span>
+              <span className="vstack grow" style={{ gap: 3, paddingBottom: 12 }}><b style={{ fontSize: 13.5 }}>{c.title}</b><span className="tiny muted">{c.who} · {c.when}</span>{c.body && <span className="small t2" style={{ background: 'var(--field)', borderRadius: 14, padding: '10px 12px' }}>{c.body}</span>}</span>
             </div>
           ); })}
         </div>
