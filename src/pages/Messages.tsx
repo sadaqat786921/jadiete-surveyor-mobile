@@ -20,8 +20,8 @@ export default function Messages() {
   return (
     <Screen tabs header={<>
       <div className="hdr-lg"><h1>Messages</h1><button className="icon-btn" aria-label="New message" onClick={() => setNw(true)}><IconPencil size={19} /></button></div>
-      <div style={{ padding: '0 20px 12px', display: 'grid', gap: 12 }}>
-        <div className="input-icon search"><IconSearch size={19} /><input className="input" placeholder="Search customer or job" value={q} onChange={e => setQ(e.target.value)} /></div>
+      <div style={{ padding: '0 16px 10px', display: 'grid', gap: 10 }}>
+        <div className="input-icon"><IconSearch size={18} /><input className="input" style={{ height: 44, fontSize: 15 }} placeholder="Search customer or job" value={q} onChange={e => setQ(e.target.value)} /></div>
         <Seg value={f} onChange={setF} items={[{ id: 'reply', label: `Needs reply · ${convos.filter(r => needsReply(r.e)).length}` }, { id: 'all', label: `All · ${convos.length}` }]} />
       </div>
     </>}>
@@ -31,10 +31,10 @@ export default function Messages() {
             const last = (e.comms || []).find(isTalk)!;
             return (
               <Link key={e.id} to={`/messages/${e.id}`} className="li" style={{ alignItems: 'flex-start' }}>
-                <Avatar i={e.initials} size={46} />
+                <Avatar i={e.initials} size={44} />
                 <span className="vstack grow" style={{ gap: 3 }}>
-                  <span className="between"><span className="row-title">{e.name}</span><span className="tiny muted">{last.when.split(',')[0]}</span></span>
-                  <span className="row-sub ell" style={{ color: 'var(--text-2)' }}>{last.body || last.title}</span>
+                  <span className="between"><b style={{ fontSize: 15 }}>{e.name}</b><span className="tiny muted">{last.when.split(',')[0]}</span></span>
+                  <span className="small t2 ell">{last.body || last.title}</span>
                   <span className="hstack" style={{ gap: 6 }}><span className="tiny muted">{v.kind} · {fmtDate(v.date)}</span>{needsReply(e) && <Tag tone="warn">Needs reply</Tag>}</span>
                 </span>
               </Link>
@@ -75,16 +75,16 @@ export function Thread() {
     toast(mode === 'note' ? 'Sent to the office · staff only' : `Email sent to ${e.name}`); setTxt('');
   };
   return (
-    <Screen scrollRef={box} header={<Header back="/messages" title={<span className="hstack" style={{ gap: 10 }}><Avatar i={e.initials} size={40} /><span className="vstack" style={{ gap: 0, minWidth: 0 }}><b className="ell" style={{ fontSize: 16, fontWeight: 600 }}>{e.name}</b><span className="tiny muted">{v.kind} · {v.status}</span></span></span>} right={<button className="icon-btn" aria-label="More" onClick={() => setSheet('menu')}><IconDots size={19} /></button>} />}
+    <Screen scrollRef={box} header={<Header back="/messages" white title={<span className="hstack" style={{ gap: 10 }}><Avatar i={e.initials} size={36} /><span className="vstack" style={{ gap: 0, minWidth: 0 }}><b className="ell" style={{ fontSize: 15 }}>{e.name}</b><span className="tiny muted">{v.kind} · {v.status}</span></span></span>} right={<button className="icon-btn" aria-label="More" onClick={() => setSheet('menu')}><IconDots size={19} /></button>} />}
       foot={<>
         <Seg value={mode} onChange={setMode} items={[{ id: 'note', label: <><IconLock size={14} />Office</> }, { id: 'email', label: <><IconMail size={14} />Customer</> }]} />
         <div className="composer">
-          <textarea value={txt} onChange={x => setTxt(x.target.value)} placeholder={mode === 'note' ? 'To Sarah in the office…' : `Email ${e.name}…`} aria-label="Message" />
+          <textarea value={txt} onChange={x => setTxt(x.target.value)} placeholder={mode === 'note' ? 'To Sarah in the office…' : `Email ${e.name}…`} style={{ background: mode === 'note' ? '#fffbef' : '#fff' }} aria-label="Message" />
           <button className="send" disabled={!txt.trim()} onClick={send} aria-label="Send"><IconSend size={20} /></button>
         </div>
         <span className="tiny muted" style={{ textAlign: 'center' }}>{mode === 'note' ? 'Only staff see this. Never shown to the customer.' : `To ${e.email} · the office sees it too`}</span>
       </>}>
-      <div className="pad" style={{ gap: 12 }}>
+      <div className="pad" style={{ gap: 10 }}>
         {thread.map(c => {
           const I = kindIcon[c.kind] || IconMail;
           if (c.kind === 'system' || c.kind === 'reminder') return <span key={c.id} className="sys"><I size={12} />{c.title} · {c.when}</span>;
@@ -92,8 +92,8 @@ export function Thread() {
           return (
             <div key={c.id} className={`bubble ${cls}`}>
               <div className="who" style={{ color: cls === 'note' ? '#8a6400' : cls === 'out' ? 'var(--primary-dark)' : 'var(--muted)' }}><I size={13} />{c.kind === 'call' ? 'Call' : c.kind === 'note' ? 'Staff note' : 'Email'} · {c.who}</div>
-              <b style={{ fontSize: 13.5, fontWeight: 600 }}>{c.title}</b>{c.body && <div style={{ marginTop: 3, color: 'var(--text-2)' }}>{c.body}</div>}
-              <div className="tiny muted" style={{ marginTop: 6, textAlign: 'right' }}>{c.when}</div>
+              <b style={{ fontSize: 14 }}>{c.title}</b>{c.body && <div style={{ marginTop: 3 }}>{c.body}</div>}
+              <div className="tiny muted" style={{ marginTop: 4, textAlign: 'right' }}>{c.when}</div>
             </div>
           );
         })}

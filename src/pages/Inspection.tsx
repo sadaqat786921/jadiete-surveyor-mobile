@@ -1,7 +1,7 @@
 // An aftercare or snag inspection: look at the problem first, so the fitter goes back with the right part.
 import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { IconChevronLeft, IconDots, IconMapPin, IconCar, IconPlayerPlay, IconSend, IconClock, IconCalendarOff, IconTool, IconInfoCircle, IconShieldCheck, IconPhone, IconHistory, IconArrowRight, IconCircleCheck, IconAlertTriangle, IconMessageCircle } from '@tabler/icons-react';
+import { IconChevronLeft, IconDots, IconMapPin, IconCar, IconPlayerPlay, IconSend, IconClock, IconCalendarOff, IconTool, IconInfoCircle, IconShieldCheck, IconPhone, IconHistory, IconArrowRight, IconCircleCheck, IconAlertTriangle } from '@tabler/icons-react';
 import { Screen, Header, Tag, Avatar, Steps, Field, PhotoGrid, SignaturePad, Empty, useToast } from '../ui/kit';
 import { me } from '../data/mock';
 import { useStore, TODAY, fmtDate } from '../data/store';
@@ -49,33 +49,34 @@ function View({ v }: { v: ReturnType<typeof useMyVisits>[number] }) {
     : <div className="row2">{v.status === 'Booked' && <button className="btn btn-outline" onClick={() => setSheet('way')}><IconCar size={18} />On my way</button>}<button className="btn btn-primary" onClick={() => { start(v); toast('Inspection started'); }}><IconPlayerPlay size={18} />Start inspection</button></div>;
 
   return (
-    <Screen foot={foot} header={<Header back over={`${x.kind === 'Aftercare' ? 'Aftercare' : 'Snag'} inspection · ${x.id}`} title={x.customer} right={<button className="icon-btn" aria-label="More" onClick={() => setSheet('menu')}><IconDots size={20} /></button>} />}>
-      <div className="pad">
-        <div className="cover" style={{ backgroundImage: `url(${img(x.photo)})`, height: 170 }}>
-          <div className="photo-tags"><Tag tone="warn">Inspection</Tag><Tag tone={statusTone[v.status]}>{v.status}</Tag></div>
+    <Screen dark foot={foot}>
+      <div className="vhero" style={{ backgroundImage: `url(${img(x.photo)})`, height: 210 }}>
+        <div className="between" style={{ padding: '6px 16px' }}>
+          <button className="icon-btn glass" aria-label="Back" onClick={() => nav(-1)}><IconChevronLeft size={22} /></button>
+          <button className="icon-btn glass" aria-label="More" onClick={() => setSheet('menu')}><IconDots size={20} /></button>
         </div>
-        <div className="card">
-          <div className="between" style={{ alignItems: 'flex-start' }}>
-            <span className="vstack" style={{ gap: 3 }}><span className="label">{fmtDate(v.date, { weekday: 'long', day: 'numeric', month: 'long' })}</span><b style={{ fontSize: 22, fontWeight: 600, letterSpacing: -0.6 }}>{v.time || '—'}</b></span>
-            <span className="outline-pill">{x.job}</span>
-          </div>
-          <div className="facts"><span><IconTool size={17} />{x.title}</span><span><IconMapPin size={17} />{v.address}</span></div>
-          <div className="divider" />
-          <Steps at={step} done={done} times={[undefined, x.inspOnWay, x.inspStarted]} />
+        <div style={{ marginTop: 'auto', padding: '0 20px 30px' }} className="vstack">
+          <span className="hstack" style={{ gap: 6 }}><Tag tone="warn">{x.kind === 'Aftercare' ? 'Aftercare inspection' : 'Snag inspection'}</Tag><Tag tone={statusTone[v.status]}>{v.status}</Tag></span>
+          <b style={{ fontSize: 20, letterSpacing: -0.4 }}>{x.title}</b>
+          <span className="hstack small" style={{ gap: 5, color: '#e3eeeb' }}><IconMapPin size={15} />{x.customer} · {v.address}</span>
         </div>
+      </div>
+      <div className="sheet-up pad">
+        <div className="card"><Steps at={step} done={done} times={[undefined, x.inspOnWay, x.inspStarted]} /></div>
         {x.moveAsked && !done && <div className="alert warn"><IconCalendarOff size={17} /><span><b>You asked the office to move this visit.</b> {x.moveAsked}</span></div>}
-        <div className="alert warn"><IconMessageCircle size={16} /><span><b>What the customer said</b><br />{x.detail.split(' — Inspected')[0]}<br /><span className="tiny muted">Reported by {x.reported}</span></span></div>
-        <div className="card" style={{ padding: '6px 20px' }}><div className="kvs">
+        <div className="card tight" style={{ background: '#fffaf0', borderColor: '#f2e0a8' }}><span className="tiny b" style={{ color: '#8a6400' }}>WHAT THE CUSTOMER SAID</span><span className="small t2">{x.detail.split(' — Inspected')[0]}</span><span className="tiny muted">Reported by {x.reported}</span></div>
+        <div className="kv">
+          <div><span>When</span><b>{fmtDate(v.date)} · {v.time.split(' ')[0] || '—'}</b></div>
+          <div><span>Job</span><b>{x.job}</b></div>
           <div><span>Products</span><b>{e?.product || '—'}</b></div>
           <div><span>Fitted</span><b>{e?.ops?.completion?.on || 'Jun 2026'}</b></div>
-          <div><span>Guarantee</span><b>{e?.ops?.closed ? '10 years from fitting' : 'In guarantee'}</b></div>
-        </div></div>
+        </div>
 
         {done ? <>
           <div className={`alert ${x.status === 'Fixed' ? 'ok' : 'info'}`}><IconCircleCheck size={17} /><span><b>Submitted {x.inspected.on}.</b> {x.status === 'Fixed' ? 'Closed with advice — no visit needed.' : 'The office books the fitter with the right part.'}</span></div>
           <div className="sec"><h3>What you found</h3></div>
-          <div className="card" style={{ padding: '6px 20px' }}><div className="kvs">
-            {([['Cause', x.inspected.cause], ['What you found', x.inspected.found], ['Fix', x.inspected.fix || 'None needed'], ['Part', x.inspected.part || '—'], ['How soon', x.status === 'Fixed' ? '—' : x.inspected.urgent], ['Photos', String(x.inspected.photos)], ['Customer signed', x.inspected.signed ? 'Yes' : 'No']] as [string, string][]).map(([l, val]) => <div key={l}><span>{l}</span><b>{val}</b></div>)}
+          <div className="card flush"><div className="list">
+            {([['Cause', x.inspected.cause], ['What you found', x.inspected.found], ['Fix', x.inspected.fix || 'None needed'], ['Part', x.inspected.part || '—'], ['How soon', x.status === 'Fixed' ? '—' : x.inspected.urgent], ['Photos', String(x.inspected.photos)], ['Customer signed', x.inspected.signed ? 'Yes' : 'No']] as [string, string][]).map(([l, val]) => <div key={l} className="li" style={{ alignItems: 'flex-start' }}><span className="small muted" style={{ width: 110, flex: '0 0 110px' }}>{l}</span><b className="small" style={{ flex: 1 }}>{val}</b></div>)}
           </div></div>
         </> : onSite ? <>
           <div className="alert warn"><IconArrowRight size={17} /><span><b>On site since {x.inspStarted}.</b> Say what you found, how to fix it and take photos.</span></div>
@@ -85,10 +86,10 @@ function View({ v }: { v: ReturnType<typeof useMyVisits>[number] }) {
           {advice ? <div className="alert ok"><IconShieldCheck size={17} />No visit is needed. The office sends the customer your advice and closes it.</div> : <>
             <Field label="How should it be fixed?"><input className="input" value={fix} onChange={y => setFix(y.target.value)} placeholder="e.g. Re-pack and adjust the hinges" /></Field>
             <Field label="Part needed (optional)"><input className="input" value={part} onChange={y => setPart(y.target.value)} placeholder="e.g. Friction hinge 16in" /></Field>
-            <Field label="How soon?"><div className="vstack" style={{ gap: 6 }}>{['As soon as possible', 'Within 2 weeks', 'Next time we are nearby'].map(o => <button key={o} type="button" className={`chip ${urgent === o ? 'on' : ''}`} style={{ justifyContent: 'flex-start', height: 48 }} onClick={() => setUrgent(o)}>{o}</button>)}</div></Field>
+            <Field label="How soon?"><div className="vstack" style={{ gap: 6 }}>{['As soon as possible', 'Within 2 weeks', 'Next time we are nearby'].map(o => <button key={o} type="button" className={`chip ${urgent === o ? 'on' : ''}`} style={{ justifyContent: 'flex-start', borderRadius: 12 }} onClick={() => setUrgent(o)}>{o}</button>)}</div></Field>
           </>}
           <Field label={`Photos · ${photos}`}><PhotoGrid n={photos} seed={1} onAdd={() => { setPhotos(p => p + 1); toast('Photo added'); }} onRemove={() => setPhotos(p => Math.max(0, p - 1))} /></Field>
-          <div className="card"><span className="row-title">Customer signature (optional)</span><SignaturePad value={signed} onChange={setSigned} name={x.customer} /></div>
+          <div className="card"><b style={{ fontSize: 14 }}>Customer signature (optional)</b><SignaturePad value={signed} onChange={setSigned} name={x.customer} /></div>
         </> : <>
           <div className="alert info"><IconInfoCircle size={17} /><span>{canStart ? <><b>Next: {x.inspOnWay ? 'start the inspection when you arrive' : 'tell the customer you are on your way'}.</b></> : <>Booked for {fmtDate(v.date, { weekday: 'long', day: 'numeric', month: 'long' })}. Start it on the day.</>}</span></div>
           {a && <span className="small muted">Booked by the office for {fmtDate(a.date)} · {a.time}</span>}
@@ -97,11 +98,13 @@ function View({ v }: { v: ReturnType<typeof useMyVisits>[number] }) {
         {e && <>
           <div className="sec"><h3>Customer</h3></div>
           <div className="card">
-            <div className="hstack" style={{ gap: 12 }}><Avatar i={e.initials} size={46} /><div className="vstack grow" style={{ gap: 1 }}><span className="row-title">{x.customer}</span><span className="row-sub">{e.phone}</span></div>
-              <a className="icon-btn soft" aria-label="Call" href={`tel:${e.phone.replace(/\s/g, '')}`} onClick={() => toast(`Calling ${x.customer}`)}><IconPhone size={19} /></a>
-              <a className="icon-btn soft" aria-label="Directions" href={maps(v.address)} target="_blank" rel="noreferrer"><IconMapPin size={19} /></a></div>
+            <div className="hstack" style={{ gap: 12 }}><Avatar i={e.initials} size={44} /><div className="vstack grow" style={{ gap: 1 }}><b>{x.customer}</b><span className="small muted">{e.phone}</span></div></div>
+            <div className="grid-2">
+              <a className="btn btn-outline btn-sm" href={`tel:${e.phone.replace(/\s/g, '')}`} onClick={() => toast(`Calling ${x.customer}`)}><IconPhone size={16} />Call</a>
+              <a className="btn btn-outline btn-sm" href={maps(v.address)} target="_blank" rel="noreferrer"><IconMapPin size={16} />Directions</a>
+            </div>
           </div>
-          <div className="grid-2"><button className="btn btn-outline btn-sm" onClick={() => setSheet('msg')}><IconSend size={16} />Message office</button><Link className="btn btn-outline btn-sm" to={`/history/${e.id}`}><IconHistory size={16} />History</Link></div>
+          <div className="grid-2"><button className="btn btn-grey btn-sm" onClick={() => setSheet('msg')}><IconSend size={16} />Message office</button><Link className="btn btn-grey btn-sm" to={`/history/${e.id}`}><IconHistory size={16} />History</Link></div>
         </>}
         {!e && <div className="alert warn"><IconAlertTriangle size={17} />No customer record linked.</div>}
       </div>

@@ -33,18 +33,18 @@ export function Device({ children }: { children: React.ReactNode }) {
     const fit = () => setScale(native ? 1 : Math.min(1, (window.innerHeight - 32) / 832));
     fit(); window.addEventListener('resize', fit); return () => window.removeEventListener('resize', fit);
   }, [native]);
-  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 2400); return () => clearTimeout(t); }, [toast]);
+  useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 2800); return () => clearTimeout(t); }, [toast]);
   const show = (m: string) => setToast({ m, k: Date.now() });
-  const jump = (to: string) => { if (!['/login', '/splash'].includes(to)) setSignedIn(true); nav(to); };
+  const jump = (to: string) => { if (to !== '/login') setSignedIn(true); nav(to); };
   return (
     <ToastCtx.Provider value={show}>
       <div className="stage">
         <aside className="side">
           <div className="brand"><img src="images/mark.svg" alt="" /><b>Jadeite</b></div>
           <h1>Surveyor app</h1>
-          <p>Final surveys and aftercare inspections on the surveyor's phone. Same records as the Office Admin, Sales and Surveyor portals. Every button works.</p>
+          <p>The surveyor's phone app for final surveys and aftercare inspections. Same records as the Office Admin, Sales and Surveyor portals. Every button works.</p>
           <div className="jump">
-            {([['Splash', '/splash', IconLogin2], ['Sign in', '/login', IconLogin2], ['Today', '/', IconHome], ['Final survey · Mrs Hughes', '/visit/EN-2279', IconRuler], ['Final survey · Mr & Mrs Collins', '/visit/EN-2274', IconPlayerPlay], ['Inspection · Mrs Cooper', '/inspection/SN-127', IconTool], ['My visits', '/visits', IconClipboardList], ['Calendar', '/calendar', IconCalendarEvent], ['Messages', '/messages', IconMessageCircle], ['Notifications', '/notifications', IconBell], ['Search', '/search', IconSearch], ['Profile', '/profile', IconUser]] as [string, string, any][]).map(([l, to, I]) => <button key={l} onClick={() => jump(to)}><I size={17} />{l}</button>)}
+            {([['Sign in', '/login', IconLogin2], ['Today', '/', IconHome], ['Final survey · Mrs Hughes', '/visit/EN-2279', IconRuler], ['Final survey · Mr & Mrs Collins', '/visit/EN-2274', IconPlayerPlay], ['Inspection · Mrs Cooper', '/inspection/SN-127', IconTool], ['My visits', '/visits', IconClipboardList], ['Calendar', '/calendar', IconCalendarEvent], ['Messages', '/messages', IconMessageCircle], ['Notifications', '/notifications', IconBell], ['Search', '/search', IconSearch], ['Profile', '/profile', IconUser]] as [string, string, any][]).map(([l, to, I]) => <button key={l} onClick={() => jump(to)}><I size={17} />{l}</button>)}
             <button onClick={() => { reset(); show('Demo data reset'); nav('/'); }}><IconRefresh size={17} />Reset demo data</button>
           </div>
           <span className="note">Demo sign-in: any email · code 482193 · demo date Fri 16 Oct 2026</span>
@@ -73,14 +73,15 @@ export function StatusBar({ light }: { light?: boolean }) {
   );
 }
 
-/** One screen: status bar, optional header, scrolling body, optional sticky footer and the floating tab bar. */
-export function Screen({ header, children, foot, tabs, plain, bg, scrollRef }: { header?: React.ReactNode; children: React.ReactNode; foot?: React.ReactNode; tabs?: boolean; plain?: boolean; bg?: string; scrollRef?: React.Ref<HTMLDivElement>; dark?: boolean; top?: React.ReactNode }) {
+/** One screen: status bar, optional header, scrolling body, optional sticky footer and tab bar. */
+export function Screen({ header, children, foot, tabs, dark, bg, top, scrollRef }: { header?: React.ReactNode; children: React.ReactNode; foot?: React.ReactNode; tabs?: boolean; dark?: boolean; bg?: string; top?: React.ReactNode; scrollRef?: React.Ref<HTMLDivElement> }) {
   return (
-    <div className={`app ${plain ? 'plain' : ''}`} style={{ background: bg }}>
-      <StatusBar />
+    <div className="app" style={{ background: bg }}>
+      {top ? null : <div style={{ background: dark ? 'var(--deep)' : bg || 'var(--bg)' }}><StatusBar light={dark} /></div>}
       <div className="page">
+        {top}
         {header}
-        <div className="scroll" ref={scrollRef}>{children}{tabs && <div style={{ height: 100 }} />}</div>
+        <div className="scroll" ref={scrollRef}>{children}</div>
         {foot && <div className="foot">{foot}</div>}
         {tabs && <TabBar />}
       </div>
@@ -88,12 +89,12 @@ export function Screen({ header, children, foot, tabs, plain, bg, scrollRef }: {
   );
 }
 
-export function Header({ title, sub, over, back, right, onBack }: { title?: React.ReactNode; sub?: React.ReactNode; over?: React.ReactNode; back?: string | boolean; right?: React.ReactNode; white?: boolean; onBack?: () => void }) {
+export function Header({ title, sub, back, right, white, onBack }: { title?: React.ReactNode; sub?: React.ReactNode; back?: string | boolean; right?: React.ReactNode; white?: boolean; onBack?: () => void }) {
   const nav = useNavigate();
   return (
-    <div className="hdr">
+    <div className={`hdr ${white ? 'white' : ''}`}>
       {back !== undefined && back !== false && <button className="icon-btn" aria-label="Back" onClick={() => (onBack ? onBack() : typeof back === 'string' ? nav(back) : nav(-1))}><IconChevronLeft size={22} /></button>}
-      <div className="ttl">{over && <span className="over">{over}</span>}{typeof title === 'string' ? <b>{title}</b> : title}{sub && <span className="sub">{sub}</span>}</div>
+      <div className="ttl">{typeof title === 'string' ? <b>{title}</b> : title}{sub && <span>{sub}</span>}</div>
       {right}
     </div>
   );
@@ -107,10 +108,10 @@ export function TabBar() {
   const replies = convos.filter(r => needsReply(r.e)).length;
   const tabs: [string, string, any, number, boolean?][] = [['/', 'Today', IconHome, today, true], ['/visits', 'Visits', IconClipboardList, open], ['/calendar', 'Calendar', IconCalendarEvent, 0], ['/messages', 'Messages', IconMessageCircle, replies], ['/profile', 'Profile', IconUser, 0]];
   return (
-    <nav className="tabbar" aria-label="Main">
+    <nav className="tabbar">
       {tabs.map(([to, l, I, n, end]) => (
-        <NavLink key={to} to={to} end={end} aria-label={l} className={({ isActive }) => (isActive ? 'active' : '')}>
-          <I size={23} stroke={1.7} /><span className="lbl">{l}</span>{n ? <span className="cnt">{n}</span> : null}
+        <NavLink key={to} to={to} end={end} className={({ isActive }) => (isActive ? 'active' : '')}>
+          <span className="ic"><I size={23} stroke={1.8} /></span>{l}{n ? <span className="cnt">{n}</span> : null}
         </NavLink>
       ))}
     </nav>
@@ -129,7 +130,7 @@ export function Sheet({ title, sub, onClose, children, footer, full, icon }: { t
         <div className="sh">
           {icon}
           <div className="grow"><b>{title}</b>{sub && <span>{sub}</span>}</div>
-          <button className="icon-btn soft" aria-label="Close" onClick={onClose} style={{ width: 36, height: 36, flex: '0 0 36px' }}><IconX size={18} /></button>
+          <button className="icon-btn" aria-label="Close" onClick={onClose} style={{ width: 34, height: 34, flex: '0 0 34px' }}><IconX size={18} /></button>
         </div>
         <div className="sb">{children}</div>
         {footer && <div className="sf">{footer}</div>}
@@ -141,7 +142,7 @@ export function Sheet({ title, sub, onClose, children, footer, full, icon }: { t
 
 /* ---------- Small controls ---------- */
 export const Tag = ({ tone = 'jade', children, icon }: { tone?: string; children: React.ReactNode; icon?: React.ReactNode }) => <span className={`tag ${tone}`}>{icon}{children}</span>;
-export const Avatar = ({ i, size = 40, bg = 'var(--tint)', fg = 'var(--primary-dark)' }: { i: string; size?: number; bg?: string; fg?: string }) => <span className="avatar" style={{ width: size, height: size, background: bg, color: fg, fontSize: size * 0.36 }}>{i}</span>;
+export const Avatar = ({ i, size = 40, bg = 'var(--tint)', fg = 'var(--primary-dark)' }: { i: string; size?: number; bg?: string; fg?: string }) => <span className="avatar" style={{ width: size, height: size, background: bg, color: fg, fontSize: Math.min(20, Math.max(11, Math.round(size * 0.34))) }}>{i}</span>;
 export const Field = ({ label, hint, children }: { label: string; hint?: React.ReactNode; children: React.ReactNode }) => <div className="field"><label>{label}</label>{children}{hint && <span className="hint">{hint}</span>}</div>;
 export const Check = ({ on, onChange, label, disabled }: { on: boolean; onChange?: (v: boolean) => void; label: React.ReactNode; disabled?: boolean }) => (
   <button type="button" className="check" disabled={disabled} onClick={() => onChange?.(!on)} aria-pressed={on}><span className={`box ${on ? 'on' : ''}`}>{on && <IconCheck size={15} stroke={3} />}</span><span style={{ flex: 1 }}>{label}</span></button>
@@ -188,7 +189,7 @@ export function SignaturePad({ value, onChange, name }: { value: boolean; onChan
       <div className="between small">
         <span className="muted">{value ? 'Signed' : 'Ask the customer to sign in the box'}</span>
         <span className="hstack" style={{ gap: 14 }}>
-          {!value && <button type="button" className="link" onClick={sample}>Sample signature</button>}
+          {!value && <button type="button" className="link" onClick={sample}>Use a sample signature</button>}
           <button type="button" className="link" onClick={() => { ref.current!.getContext('2d')!.clearRect(0, 0, W, H); onChange(false); }}><IconEraser size={15} />Clear</button>
         </span>
       </div>
@@ -198,8 +199,6 @@ export function SignaturePad({ value, onChange, name }: { value: boolean; onChan
 
 /** Photos taken on site. In the demo each tap adds a property photo. */
 const SAMPLE = ['house', 'window', 'door', 'bifold', 'roof', 'orangery'];
-/** A round icon in a soft circle — the one icon style used everywhere. */
-export const ICircle = ({ children, jade, sm }: { children: React.ReactNode; jade?: boolean; sm?: boolean }) => <span className={`icircle ${jade ? 'jade' : ''} ${sm ? 'sm' : ''}`}>{children}</span>;
 export function PhotoGrid({ n, onAdd, onRemove, disabled, seed = 0, max = 9 }: { n: number; onAdd?: () => void; onRemove?: () => void; disabled?: boolean; seed?: number; max?: number }) {
   return (
     <div className="pgrid">
