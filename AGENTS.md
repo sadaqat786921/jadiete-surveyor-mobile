@@ -1,7 +1,7 @@
 # Jadeite Systems · Surveyor app (mobile, Figma Make)
 
 Clickable prototype of the **Surveyor mobile app** for Jadeite Glazing (windows, doors, bifolds, orangeries) — the surveyor's phone app on the same platform as the Office Admin, the Sales portal and the Surveyor web portal.
-React 19 + Vite + TypeScript, running inside Figma Make. Phone size **375 × 812**. On a desktop it shows inside a phone frame with a "jump to" panel; on a real phone it fills the screen.
+React 19 + Vite + TypeScript, running inside Figma Make. Phone size **375 × 812**. On a desktop it shows inside a phone frame, centred on the page; on a real phone it fills the screen.
 
 The demo is signed in as **Priya Shah** (surveyor). She only sees the visits booked for her. Demo "today" is Friday 16 Oct 2026.
 

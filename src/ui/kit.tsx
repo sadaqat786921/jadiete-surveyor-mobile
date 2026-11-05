@@ -27,7 +27,6 @@ export function Device({ children }: { children: React.ReactNode }) {
   const [screenEl, setScreenEl] = useState<HTMLElement | null>(null);
   const [toast, setToast] = useState<{ m: string; k: number } | null>(null);
   const nav = useNavigate();
-  const { reset } = useStore();
   useLayoutEffect(() => {
     document.documentElement.classList.toggle('native', native);
     const fit = () => setScale(native ? 1 : Math.min(1, (window.innerHeight - 32) / 832));
@@ -35,20 +34,9 @@ export function Device({ children }: { children: React.ReactNode }) {
   }, [native]);
   useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 2800); return () => clearTimeout(t); }, [toast]);
   const show = (m: string) => setToast({ m, k: Date.now() });
-  const jump = (to: string) => { if (to !== '/login') setSignedIn(true); nav(to); };
   return (
     <ToastCtx.Provider value={show}>
       <div className="stage">
-        <aside className="side">
-          <div className="brand"><img src="images/mark.svg" alt="" /><b>Jadeite</b></div>
-          <h1>Surveyor app</h1>
-          <p>The surveyor's phone app for final surveys and aftercare inspections. Same records as the Office Admin, Sales and Surveyor portals. Every button works.</p>
-          <div className="jump">
-            {([['Sign in', '/login', IconLogin2], ['Today', '/', IconHome], ['Final survey · Mrs Hughes', '/visit/EN-2279', IconRuler], ['Final survey · Mr & Mrs Collins', '/visit/EN-2274', IconPlayerPlay], ['Inspection · Mrs Cooper', '/inspection/SN-127', IconTool], ['My visits', '/visits', IconClipboardList], ['Calendar', '/calendar', IconCalendarEvent], ['Messages', '/messages', IconMessageCircle], ['Notifications', '/notifications', IconBell], ['Search', '/search', IconSearch], ['Profile', '/profile', IconUser]] as [string, string, any][]).map(([l, to, I]) => <button key={l} onClick={() => jump(to)}><I size={17} />{l}</button>)}
-            <button onClick={() => { reset(); show('Demo data reset'); nav('/'); }}><IconRefresh size={17} />Reset demo data</button>
-          </div>
-          <span className="note">Demo sign-in: any email · code 482193 · demo date Fri 16 Oct 2026</span>
-        </aside>
         <div className="device-wrap" style={{ transform: `scale(${scale})`, marginBottom: native ? 0 : -(1 - scale) * 832 }}>
           <div className="device">
             <div className="screen" ref={setScreenEl}>
